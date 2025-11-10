@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PoetryDB API Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fafafa;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        .poem {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 15px;
+            margin: 15px auto;
+            width: 80%;
+            text-align: left;
+        }
+        select, button {
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        section {
+            margin-top: 40px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            text-align: left;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        a {
+            color: #0066cc;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Poetry Finder (PoetryDB API)</h1>
+    <p>Select a poet and click "Get Poems" to view a few of their works.</p>
+
+    
+    <select id="authorSelect">
+        <option value="">Choose an Author</option>
+        <option value="William Shakespeare">William Shakespeare</option>
+        <option value="Emily Dickinson">Emily Dickinson</option>
+        <option value="Robert Frost">Robert Frost</option>
+        <option value="Edgar Allan Poe">Edgar Allan Poe</option>
+        <option value="William Blake">William Blake</option>
+    </select>
+
+    <button id="getPoems">Get Poems</button>
+
+    <div id="result"></div>
+
+    <section>
+        <h2>About the API</h2>
+        <p><strong>API Selected:</strong> PoetryDB</p>
+        <p><strong>Why I Selected It:</strong> I chose PoetryDB because it is free and it does not require authentication. It returns classic poetry data in JSON format. I have an appreciation for poetry, so this 
+        particular database was interesting to me. </p>
+        <p><strong>Source Website:</strong> <a href="https://poetrydb.org/" target="_blank">https://poetrydb.org/</a></p>
+        <p><strong>Parameters Used:</strong> The endpoint I used is <code>https://poetrydb.org/author/{AuthorName}</code>. The author’s name is a required parameter in the URL that tells the API which poet’s work to return.</p>
+        <p><strong>Example Use Case:</strong> This API could power a “Poem of the Day” feature on an educational website or a mobile app that helps students explore poets and their writing styles.</p>
+    </section>
+
+    <script>
+        document.getElementById("getPoems").addEventListener("click", function() {
+            const author = document.getElementById("authorSelect").value;
+            const resultDiv = document.getElementById("result");
+
+            if (!author) {
+                resultDiv.innerHTML = "<p style='color:red;'>Please select an author first.</p>";
+                return;
+            }
+
+            const url = "https://poetrydb.org/author/" + author;
+            resultDiv.innerHTML = "<p>Loading poems...</p>";
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error("Network response was not ok");
+                    return response.json();
+                })
+                .then(data => {
+                    resultDiv.innerHTML = "";
+                    // the returned data is an array of poems by the author, slice 
+                    // only shows the first three poems 
+                    const limitedPoems = data.slice(0, 3); 
+                    // loop through each poem in the array, 
+                    // and for each poem object, create a new div
+                    // then print out each data in the div 
+                    limitedPoems.forEach(poem => {
+                        const poemDiv = document.createElement("div");
+                        poemDiv.className = "poem";
+                        poemDiv.innerHTML = `
+                            <h3>${poem.title}</h3>
+                            <p><em>by ${poem.author}</em></p>
+                            <p>${poem.lines.slice(0, 6).join("<br>")}<br>...</p>
+                        `;
+                        // makes it so that all the poems are within the result div 
+                        resultDiv.appendChild(poemDiv);
+                    });
+                })
+                .catch(error => {
+                    resultDiv.innerHTML = `<p style='color:red;'>Error fetching poems: ${error}</p>`;
+                });
+        });
+    </script>
+
+</body>
+</html>
